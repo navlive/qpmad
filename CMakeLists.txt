@@ -1,5 +1,5 @@
 # General parameters
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(qpmad VERSION 1.1.1)
 
 # --------------
@@ -19,9 +19,13 @@ option(QPMAD_USE_HOUSEHOLDER    "Use Housholder matrices for updating factorizat
 # --------------
 # Process options
 # --------------
-if(NOT CMAKE_BUILD_TYPE)
-    set (CMAKE_BUILD_TYPE RelWithDebInfo)
-endif (NOT CMAKE_BUILD_TYPE)
+set(CMAKE_CXX_STANDARD 17)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 set(QPMAD_SOURCE_DIR   "${PROJECT_SOURCE_DIR}/include/")
 # --------------
@@ -53,6 +57,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKEUT_CXX_FLAGS}")
 # --------------
 # Dependencies
 # --------------
+find_package(ament_cmake REQUIRED)
 # Eigen
 find_package(Eigen3 REQUIRED)
 include_directories (SYSTEM "${EIGEN3_INCLUDE_DIR}")
@@ -143,6 +148,12 @@ install (FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
          DESTINATION "${QPMAD_CMAKE_INSTALL_DESTINATION}/")
 
 install (DIRECTORY "${QPMAD_SOURCE_DIR}/${PROJECT_NAME}/"
-         DESTINATION "${QPMAD_INCLUDE_INSTALL_DESTINATION}"
+         DESTINATION include/${PROJECT_NAME}/
          FILES_MATCHING PATTERN "*.h")
+
 # --------------
+
+# Note: This is a header-only library
+ament_export_include_directories(include)
+ament_export_dependencies(Eigen3)
+ament_package()
